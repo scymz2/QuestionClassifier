@@ -6,11 +6,17 @@ import numpy as np
 import configparser
 import argparse
 
-import utility.preprocessing
+from utility.preprocessing import*
 from collections import Counter
 
 torch.manual_seed(1)
 random.seed(1)
+
+def load_file(config):
+    loader = Preprocessing()
+    loader.read_raw_file(config['PATH']['path_raw'], '')
+    loader.split_dataset_to(config['PATH']['path_train'], config['PATH']['path_dev'])
+
 
 def train(config):
     print("train_path:", config['PATH']['path_train'])
@@ -30,6 +36,9 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.sections()
     config.read(config_path)
+
+    #load and preprocess the raw data
+    load_file(config)
 
     # train
     if args.train:
