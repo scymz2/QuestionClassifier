@@ -6,7 +6,7 @@ import numpy as np
 import configparser
 import argparse
 
-import utility.preprocessing
+from utility import file_loader
 from collections import Counter
 
 torch.manual_seed(1)
@@ -38,5 +38,6 @@ if __name__ == "__main__":
     # test
     elif args.test:
         test(config)
+
 
 

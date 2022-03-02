@@ -4,7 +4,7 @@
 import numpy as np
 
 
-class Preprocessing:
+class File_loader:
     def __init__(self):
         self.raw_path = ''
         self.stop_path = ''
@@ -13,14 +13,13 @@ class Preprocessing:
         self.sentences = []
         self.raw_sentences = []
 
-    def read_raw_file(self, raw_path, stop_path):
+    def read_file(self, raw_path, stop_path):
         """
         read the raw questions from the question file raw_data.txt
-        input empty string if the stopwords is not needed
+        input empty string if the stopwords are not needed
         and split the data into label part and sentence part
         :param raw_path: The path to the raw question file
         :param stop_path: The path to the stopwords file
-        :param stop: indicates whether the stopwords should be removed or not
         """
         self.raw_path = raw_path
         self.stop_path = stop_path
@@ -30,13 +29,12 @@ class Preprocessing:
         with open(self.raw_path, 'r') as f:
             for line in f:
                 self.raw_sentences.append(line)
-                line = line.lower().strip('\n')  # lowercase and remove \n
+                line = line.strip('\n')  # lowercase and remove \n
                 result = line.split(' ', 1)
                 if stop_path != '':
                     result[1] = self.remove_stopwords(result[1])
                 self.labels.append(result[0])
-                self.sentences.append(result[1])
-        # store data into file if needed
+                self.sentences.append(result[1].lower())
 
     def read_stopwords(self):
         """
@@ -60,7 +58,7 @@ class Preprocessing:
                 new_sentence.append(w)
         return ' '.join(new_sentence)
 
-    def split_dataset_to(self, train_file_name, dev_file_name, ratio=0.1):
+    def split_dataset(self, train_file_name, dev_file_name, ratio=0.1):
         """
         This function split the original dataset into train set and development set
         :param dev_file_name:  path to dev.txt
