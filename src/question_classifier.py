@@ -30,13 +30,20 @@ def train(config):
     data_dev = dev.sentences
     label_dev = dev.labels
 
-    pre_train_weight = Pre_train()
+    pre_train_loader = Pre_train()
+    pre_train_weight = pre_train_loader.get_weight()
+    vocab_size = pre
 
-    model = Model(pre_train_weight, )
-
+    model = Model(model=['SETTING']['model'],
+                  pre_train_weight=pre_train_weight,
+                  pre_train=['SETTING']['pre_train'],
+                  freeze=['SETTING']['freeze'],
+                  embedding_dim=['STRUCTURE']['embedding_dim'],
+                  vocab_size=vocab_size,
+                  hidden_dim_bilstm=['STRUCTURE']['hidden_dim_bilstm'])
 
 def test(config):
-    print("test_path", config['PATH']['path_train'])
+
 
 if __name__ == "__main__":
 
