@@ -22,12 +22,12 @@ def load_raw_file(config):
 def train(config):
     train = File_loader()
     train.read_file(config['PATH']['path_train'],'')
-    feature_train = train.sentences
+    data_train = train.sentences
     label_train = train.labels
 
     dev = File_loader()
     dev.read_file(config['PATH']['path_dev'],'')
-    feature_dev = dev.sentences
+    data_dev = dev.sentences
     label_dev = dev.labels
 
     pre_train_weight = Pre_train()
