@@ -16,6 +16,6 @@ class BoW(nn.Module):
         else:
             self.bag_of_words = nn.EmbeddingBag(vocab_size, emb_dim, freeze=False, mode='mean')
 
-    def forward(self, x):
-        output = self.bag_of_words(x)
+    def forward(self, sentence):
+        output = self.bag_of_words(sentence)
         return output
