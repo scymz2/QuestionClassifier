@@ -1,5 +1,22 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import torch
+import torch.nn as nn
 
-class BiLSTM():
-    pass
+class BiLSTM(nn.Module):
+    def __init__(self, pre_train, freeze, pre_train_weight, vocab_size, embedding_dim, hidden_dim, taget_size):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+
+        if pre_train == True:
+            self.word_embeddings = nn.embedding.from_pretrained(pre_train_weight,freeze=freeze)
+        else:
+            self.word_embeddings = nn.embedding(vocab_size, embedding_dim)
+
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, bidirectional=True)
+
+    def forward(self, sentence):
+        embeds = self.word_embeddings(sentence)
+        lstm_out, _ = self.lstm(embeds.view(len(sentence), 1, -1))
+
+        return lstm_out
