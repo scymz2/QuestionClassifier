@@ -6,20 +6,34 @@ import numpy as np
 import configparser
 import argparse
 
-from utility.preprocessing import*
-from collections import Counter
+from utility.file_loader import*
+from model import*
+from utility.pre_train import*
 
 torch.manual_seed(1)
 random.seed(1)
 
-def load_file(config):
-    loader = Preprocessing()
-    loader.read_raw_file(config['PATH']['path_raw'], '')
-    loader.split_dataset_to(config['PATH']['path_train'], config['PATH']['path_dev'])
-
+def load_raw_file(config):
+    loader = File_loader()
+    loader.read_file(config['PATH']['path_raw'], '')
+    loader.split_dataset(config['PATH']['path_train'], config['PATH']['path_dev'])
+    print(loader.sentences)
 
 def train(config):
-    print("train_path:", config['PATH']['path_train'])
+    train = File_loader()
+    train.read_file(config['PATH']['path_train'],'')
+    feature_train = train.sentences
+    label_train = train.labels
+
+    dev = File_loader()
+    dev.read_file(config['PATH']['path_dev'],'')
+    feature_dev = dev.sentences
+    label_dev = dev.labels
+
+    pre_train_weight = Pre_train()
+
+    model = Model(pre_train_weight, )
+
 
 def test(config):
     print("test_path", config['PATH']['path_train'])
@@ -38,7 +52,7 @@ if __name__ == "__main__":
     config.read(config_path)
 
     #load and preprocess the raw data
-    load_file(config)
+    load_raw_file(config)
 
     # train
     if args.train:
