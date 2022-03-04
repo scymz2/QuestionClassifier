@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import torch.nn as aa
-from sentence_rep.bow import*
-from sentence_rep.biLSTM import*
+from bow import*
+from biLSTM import*
 from classifier import*
 
 class Model(nn.Module):
