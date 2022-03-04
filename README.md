@@ -45,9 +45,11 @@ word tokenization->word embedding->sentence representation (BOW, BiLSTM)->traini
 ## environment
 `System environment for testing` Manchester computer science virtual machine Ubuntu (64.bit) CSImage 2122 v15 PGT
 4GB RAM CPU 3
+
 `hardware environment ` Huawei Matebook14 2019 windows 11, with 8-gen Core i5 CPU and 8GB RAM
 
 `Training dataset` [5500-labeled questions](https://cogcomp.seas.upenn.edu/Data/QA/QC/train_5500.label)
+
 `Testing dataset` [TREC 10](https://cogcomp.seas.upenn.edu/Data/QA/QC/TREC_10.label)
 
 ## run
