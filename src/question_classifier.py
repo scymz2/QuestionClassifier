@@ -22,25 +22,26 @@ def load_raw_file(config):
 def train(config):
     train = File_loader()
     train.read_file(config['PATH']['path_train'],'')
-    data_train = train.sentences
-    label_train = train.labels
+
 
     dev = File_loader()
     dev.read_file(config['PATH']['path_dev'],'')
-    data_dev = dev.sentences
-    label_dev = dev.labels
+
 
     pre_train_loader = Pre_train()
     pre_train_weight = pre_train_loader.get_weight()
     vocab_size = pre
 
-    model = Model(model=['SETTING']['model'],
+    model = Model(model=config['SETTING']['model'],
                   pre_train_weight=pre_train_weight,
-                  pre_train=['SETTING']['pre_train'],
-                  freeze=['SETTING']['freeze'],
-                  embedding_dim=['STRUCTURE']['embedding_dim'],
+                  pre_train=config['SETTING']['pre_train'],
+                  freeze=config['SETTING']['freeze'],
+                  embedding_dim=config['STRUCTURE']['embedding_dim'],
                   vocab_size=vocab_size,
-                  hidden_dim_bilstm=['STRUCTURE']['hidden_dim_bilstm'])
+                  hidden_dim_bilstm=config['STRUCTURE']['hidden_dim_bilstm'],
+                  n_input=config['STRUCTURE']['n_input'],
+                  n_hidden=config['STRUCTURE']['n_hidden'],
+                  n_output=config['STRUCTURE']['n_output'])
 
 def test(config):
 

@@ -4,7 +4,14 @@ import torch
 import torch.nn as nn
 
 class BiLSTM(nn.Module):
-    def __init__(self, pre_train_weight, vocab_size, pre_train, freeze, embedding_dim, hidden_dim):
+    def __init__(self,
+                 pre_train_weight,
+                 vocab_size,
+                 pre_train,
+                 freeze,
+                 embedding_dim,
+                 hidden_dim):
+
         super().__init__()
         self.hidden_dim = hidden_dim
 

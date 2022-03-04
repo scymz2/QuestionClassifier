@@ -7,8 +7,8 @@ class Classifier(nn.Module):
         self.layer2 = nn.Linear(n_hidden, n_hidden)
         self.predict = nn.Linear(n_hidden, n_output)
 
-    def forward(self, x):
-        out1 = self.layer1(x)
+    def forward(self, sentence_rep):
+        out1 = self.layer1(sentence_rep)
         out2 = self.layer2(out1)
         out = self.predict(out2)
 

@@ -27,10 +27,6 @@ them
 their
 theirs
 themselves
-what
-which
-who
-whom
 this
 that
 these
@@ -43,14 +39,6 @@ were
 be
 been
 being
-have
-has
-had
-having
-do
-does
-did
-doing
 a
 an
 the
@@ -93,10 +81,6 @@ then
 once
 here
 there
-when
-where
-why
-how
 all
 any
 both
