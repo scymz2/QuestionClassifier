@@ -16,9 +16,9 @@ class BiLSTM(nn.Module):
         self.hidden_dim = hidden_dim
 
         if pre_train == True:
-            self.word_embeddings = nn.embedding.from_pretrained(pre_train_weight,freeze=freeze)
+            self.word_embeddings = nn.Embedding.from_pretrained(pre_train_weight,freeze=freeze)
         else:
-            self.word_embeddings = nn.embedding(vocab_size, embedding_dim)
+            self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, bidirectional=True)
 
