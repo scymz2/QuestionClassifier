@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 
 import numpy as np
+from collections import Counter
+import torch
 
 
 class File_loader:
@@ -12,8 +14,17 @@ class File_loader:
         self.labels = []
         self.sentences = []
         self.raw_sentences = []
+        self.words = []
+        self.vocab = []
+        self.vocab_size = 0
+        # the following attributes could be deleted after the development
+        self.word2idx = []
+        self.label2idx = []
+        self.encoded_sentences = []
+        self.encoded_labels = []
+        self.encoded_data = []
 
-    def read_file(self, raw_path, stop_path):
+    def read_file(self, raw_path, stop_path=''):
         """
         read the raw questions from the question file raw_data.txt
         input empty string if the stopwords are not needed
@@ -35,6 +46,8 @@ class File_loader:
                     result[1] = self.remove_stopwords(result[1])
                 self.labels.append(result[0])
                 self.sentences.append(result[1].lower())
+        # split sentences into words
+        self.words = [sen.split(" ") for sen in self.sentences]
 
     def read_stopwords(self):
         """
@@ -79,8 +92,66 @@ class File_loader:
         # write the train data into the file
         with open(train_file_name, 'w') as f:
             for i in range(len(train_data)):
-                f.write(train_data[i])
+                f.write(train_data[i].strip('\n') + '\n')
         # write the dev data into the file
         with open(dev_file_name, 'w') as f2:
             for j in range(len(dev_data)):
-                f2.write(dev_data[j])
+                f2.write(dev_data[j].strip('\n') + '\n')
+
+    def read_vocab(self, path):
+        """
+        This function reads vocabulary file
+        :param path: The path to vocabulary.txt
+        :return:
+        """
+        with open(path, 'r') as f:
+            for line in f:
+                self.vocab.append(line.strip('\n'))
+
+    def create_vocab(self, path=''):
+        """
+        This function creates the vocabulary for the raw_data.txt
+        and store the vocabularies in the vocabulary.txt
+        NOTE THAT THIS FUNCTION IS ONLY FOR THE raw_data.txt
+        :param path: The path to store the vocabulary.txt
+        """
+        assert len(self.words) > 0, "Please read the raw data then call this function"
+        words = sum(self.words, [])
+        self.vocab = Counter(words)
+        self.vocab = sorted(self.vocab, key=self.vocab.get, reverse=True)
+        self.vocab_size = len(self.vocab)
+        if path != '':
+            # store vocabulary if path is not empty
+            with open(path, 'w') as f:
+                for i in range(self.vocab_size):
+                    f.write(self.vocab[i] + '\n')
+
+    def get_encoded_data(self, padding):
+        """
+        This function encodes the sentences and labels
+        :return: The encoded data in the format of
+        [([encoded sentence], encoded label),...] -> example. [([3,1,4,5], 2),...]
+        """
+        # encode sentences
+        assert len(self.words) > 0, "Please read the raw data!"
+        assert len(self.vocab) > 0, "Please read the vocabulary!"
+        self.word2idx = {w: idx for idx, w in enumerate(self.vocab)}
+        self.encoded_sentences = [[self.word2idx[w] for w in word] for word in self.words]
+        # encode labels
+        labels = Counter(self.labels)
+        labels = sorted(labels, key=labels.get, reverse=True)
+        self.label2idx = {l: idx for idx, l in enumerate(labels)}
+        self.encoded_labels = [self.label2idx[label] for label in self.labels]
+        # padding for the short sentences
+        for en_sen in self.encoded_sentences:
+            while len(en_sen) < padding:
+                en_sen.append(-1)
+        # put the encoded labels and sentences together
+        for i in range(len(self.encoded_labels)):
+            en_sen = torch.LongTensor(self.encoded_sentences[i])
+            en_lab = torch.LongTensor([self.encoded_labels[i]])
+            data_pair = (en_sen, en_lab)
+            self.encoded_data.append(data_pair)
+
+        return self.encoded_data
+
