@@ -17,26 +17,43 @@ def load_raw_file(config):
     loader = File_loader()
     loader.read_file(config['PATH']['path_raw'], '')
     loader.split_dataset(config['PATH']['path_train'], config['PATH']['path_dev'])
-    print(loader.sentences)
+    loader.create_vocab(config['PATH']['path_vocab'])
+    vocab = loader.vocab
 
-def train(config):
-    train = File_loader()
-    train.read_file(config['PATH']['path_train'],'')
-    data_train = train.sentences
-    label_train = train.labels
+    return vocab
 
-    dev = File_loader()
-    dev.read_file(config['PATH']['path_dev'],'')
-    data_dev = dev.sentences
-    label_dev = dev.labels
+def get_encoded_data(path_file, path_vocab,padding):
+    loader = File_loader()
+    loader.read_file(path_file,'')
+    loader.read_vocab(path_vocab)
+    data = loader.get_encoded_data(int(padding))
 
-    pre_train_weight = Pre_train()
+    return data
 
-    model = Model(pre_train_weight, )
+def train(config, vocab):
+    train_data = get_encoded_data(config['PATH']['path_train'], config['PATH']['path_vocab'], config['PARAMETER']['padding'])
 
+    dev_data = get_encoded_data(config['PATH']['path_dev'], config['PATH']['path_vocab'], config['PARAMETER']['padding'])
+
+    pre_train_loader = Pre_train_loader()
+    pre_train_weight = pre_train_loader.get_weight(config['PATH']['path_pre_train'], vocab)
+    vocab_size = len(vocab)
+
+
+    model = Model(model=config['SETTING']['model'],
+                  pre_train_weight=pre_train_weight,
+                  pre_train=(config['SETTING']['pre_train']==True),
+                  freeze=(config['SETTING']['freeze']==True),
+                  embedding_dim=int(config['STRUCTURE']['embedding_dim']),
+                  vocab_size=vocab_size,
+                  hidden_dim_bilstm=config['STRUCTURE']['hidden_dim_bilstm'],
+                  n_input=int(config['STRUCTURE']['n_input']),
+                  n_hidden=int(config['STRUCTURE']['n_hidden']),
+                  n_output=int(config['STRUCTURE']['n_output']))
 
 def test(config):
-    print("test_path", config['PATH']['path_train'])
+    pass
+
 
 if __name__ == "__main__":
 
@@ -52,14 +69,13 @@ if __name__ == "__main__":
     config.read(config_path)
 
     #load and preprocess the raw data
-    load_raw_file(config)
+    vocab = load_raw_file(config)
 
     # train
     if args.train:
-        train(config)
+        train(config, vocab)
 
     # test
     elif args.test:
         test(config)
-
 
