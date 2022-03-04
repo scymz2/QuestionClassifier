@@ -2,7 +2,9 @@
 
 ## contributors (sort by surname)
 The university of manchester Postgards - March 2022
+
 Coursework 1 for text mining comp61332
+
 Xinyi Ouyang - Chuhan Qiu - Mingchen Wan - Zhangli Wang - Mochuan Zhan
 
 ## pipeline
