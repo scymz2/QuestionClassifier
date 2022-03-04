@@ -29,18 +29,16 @@ word tokenization -> word embedding -> sentence representation(BOW, BiLSTM) -> t
 │   ├── document.md
 │   └── document.pdf
 ├── src
-│   ├── sentence_rep
-│   │   ├── __init__.py
-│   │   ├── biLSTM.py
-│   │   └── bow.py
 │   ├── utility
 │   │   ├── __init__.py
 │   │   ├── file_loader.py
 │   │   └── pre_train.py
 │   ├── __init__.py
+│   ├── biLSTM.py
+│   ├── bow.py
 │   ├── config.ini
 │   ├── model.py
-│   └──  question_classifier.py  
+│   └── question_classifier.py  
 └──
 
 ```
