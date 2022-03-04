@@ -1,8 +1,8 @@
 import torch.nn as nn
 
 class Classifier(nn.Module):
-    def __init_(self,n_input,n_hidden,n_output):
-        super().__init_()
+    def __init__(self, n_input, n_hidden, n_output):
+        super().__init__()
         self.layer1 = nn.Linear(n_input, n_hidden)
         self.layer2 = nn.Linear(n_hidden, n_hidden)
         self.predict = nn.Linear(n_hidden, n_output)

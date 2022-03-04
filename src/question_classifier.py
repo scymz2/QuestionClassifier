@@ -38,7 +38,6 @@ def train(config, vocab):
     pre_train_loader = Pre_train_loader()
     pre_train_weight = pre_train_loader.get_weight(config['PATH']['path_pre_train'], vocab)
     vocab_size = len(vocab)
-    print(vocab_size)
 
 
     model = Model(model=config['SETTING']['model'],
