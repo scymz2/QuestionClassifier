@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import torch.nn as aa
-from sentence_rep.bow import*
-from sentence_rep.biLSTM import*
+from bow import*
+from biLSTM import*
 from classifier import*
 
 class Model(nn.Module):
@@ -26,7 +25,7 @@ class Model(nn.Module):
             self.sentence_rep = BoW(pre_train_weight, vocab_size, pre_train, freeze, embedding_dim)
         if model == 'bilstm':
             self.sentence_rep = BiLSTM(pre_train_weight, vocab_size, pre_train, freeze,  embedding_dim, hidden_dim_bilstm)
-        self.classifier = Classifier(n_input, n_hidden, n_output)
+        self.classifier = Classifier(n_input,n_hidden,n_output)
 
     def forward(self,input):
         out1 = self.sentence_rep(input)
