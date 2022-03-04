@@ -11,7 +11,7 @@ Xinyi Ouyang - Chuhan Qiu - Mingchen Wan - Zhangli Wang - Mochuan Zhan
 ```
 word tokenization->word embedding->sentence representation (BOW, BiLSTM)->training classifier (NN)
 ```
-![Pipeline](https://github.com/scymz2/QuestionClassifier/edit/master/document/img/test.jpg)
+![Pipeline](https://github.com/scymz2/QuestionClassifier/edit/master/document/img/pipeline.jpg)
 ## folder structure
 ```
 .
