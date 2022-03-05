@@ -9,11 +9,11 @@ import torch.nn as nn
 
 class BoW(nn.Module):
     def __init__(self,
-                 pre_train_weight,
-                 vocab_size,
-                 pre_train,
-                 freeze,
-                 embedding_dim):
+                 pre_train_weight=0,
+                 vocab_size=0,
+                 pre_train=True,
+                 freeze=False,
+                 embedding_dim=300):
 
         super().__init__()
         if pre_train == True:
@@ -30,6 +30,6 @@ class BoW(nn.Module):
         out = self.bag_of_words(sentence)
         return out
         # out = self.embedding(sentence)
-        # out = torch.mean(out, dim=1)
+        # out = torch.mean(out, dim=0)
         #
         # return out
