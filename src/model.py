@@ -21,7 +21,7 @@ class Model(nn.Module):
 
         if model == 'bow':
             if pre_train==False:
-                pre_train_weight=0
+                pre_train_weight=None
             self.sentence_rep = BoW(pre_train_weight, vocab_size, pre_train, freeze, embedding_dim)
         if model == 'bilstm':
             self.sentence_rep = BiLSTM(pre_train_weight, vocab_size, pre_train, freeze,  embedding_dim, hidden_dim_bilstm)
