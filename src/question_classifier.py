@@ -104,8 +104,42 @@ def train(config, vocab):
         # print('Epoch: ' + epoch + '\nTrain: Accuracy: ' + train_acc + ', F1_score: ', + train_f1, + '\nValidation: Accuracy: '+ dev_acc, +', F1_score' + dev_f1)
         # print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', F1_score: ', train_f1)
 
+        # save model state
+        torch.save(model.state_dict(), config['PATH']['path_model_state'])
+
 def test(config):
-    pass
+    # load test data
+    test_data= get_encoded_data(config['PATH']['path_test'], config['PATH']['path_vocab'], config['PATH']['path_label'],  config['PATH']['path_stopwords'], config['SETTING']['padding'])
+    test_loader = torch.utils.data.DataLoader(test_data)
+
+    # load model
+    pre_train_loader = Pre_train_loader()
+    pre_train_weight = pre_train_loader.get_weight(config['PATH']['path_pre_train'], vocab)
+    vocab_size = len(vocab) + 1
+
+    model = Model(model=config['SETTING']['model'],
+                  pre_train_weight=pre_train_weight,
+                  pre_train=(config['SETTING']['pre_train'] == True),
+                  freeze=(config['SETTING']['freeze'] == True),
+                  embedding_dim=int(config['STRUCTURE']['embedding_dim']),
+                  vocab_size=vocab_size,
+                  hidden_dim_bilstm=int(config['STRUCTURE']['hidden_dim_bilstm']),
+                  n_input=int(config['STRUCTURE']['n_input']),
+                  n_hidden=int(config['STRUCTURE']['n_hidden']),
+                  n_output=int(config['STRUCTURE']['n_output'])
+                  )
+    model.load_state_dict(torch.load(config['PATH']['path_model_state']))
+
+    # test
+    model.eval()
+    with torch.no_grad():
+        test_features = torch.stack([e[0] for e in test_loader.dataset])
+        test_labels = torch.LongTensor([e[1] for e in test_loader.dataset])
+        outputs = model(test_features)
+        test_acc, test_F1 = compute_acc(outputs, test_labels)
+        print('Test Accuracy: ' + str(test_acc))
+
+
 
 
 if __name__ == "__main__":
