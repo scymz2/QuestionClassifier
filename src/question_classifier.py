@@ -7,6 +7,7 @@ import sklearn.metrics as metrics
 import numpy as np
 import configparser
 import argparse
+import os
 
 from utility.file_loader import*
 from model import*
@@ -22,6 +23,13 @@ def load_raw_file(config):
     loader.create_vocab_and_label(config['PATH']['path_vocab'],config['PATH']['path_label'])
     vocab = loader.vocab
 
+    return vocab
+
+def get_vocab(config):
+    vocab = []
+    with open(config['PATH']['path_vocab'], 'r') as f:
+        for line in f:
+            vocab.append(line.strip('\n'))
     return vocab
 
 def get_encoded_data(path_file, path_vocab,path_label, path_stop, padding):
@@ -47,7 +55,7 @@ def train(config, vocab):
 
     pre_train_loader = Pre_train_loader()
     pre_train_weight = pre_train_loader.get_weight(config['PATH']['path_pre_train'], vocab)
-    vocab_size = len(vocab)
+    vocab_size = len(vocab) +1
 
     model = Model(model=config['SETTING']['model'],
                   pre_train_weight=pre_train_weight,
@@ -69,27 +77,24 @@ def train(config, vocab):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-    outs = []
-    targets = []
+
     losses, train_accs = [], []
     for epoch in range(num_epoch):
         for train_features, train_labels in iter(train_loader):
             output = model(train_features)
-            # print(output)
             loss = criterion(output, train_labels)                    # compute loss
+
             loss.backward()                                         # backward pass
             optimizer.step()                                        # update weights
             optimizer.zero_grad()                                   # clean gradients
 
-            outs.append(output)
-            targets.append(train_labels)
             # record training information
-            losses.append(float(loss/batch_size))                   # average loss of the batch
+            losses.append(float(loss)/batch_size)                   # average loss of the batch
             # train_acc = compute_acc(output, train_labels)
             # train_accs.append(train_acc)                            # training accuracy
             train_acc, train_f1 = compute_acc(output, train_labels)
-            print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', F1_score: ', train_f1)
-
+            # print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', F1_score: ', train_f1)
+            print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc)
         # model_path = str('../data/model.' + config['PATH'][config['SETTING']['model']])
         # torch.save(model, model_path)
         # dev_out = model(dev_feat)
@@ -116,8 +121,12 @@ if __name__ == "__main__":
     config.sections()
     config.read(config_path)
 
-    #load and preprocess the raw data
-    vocab = load_raw_file(config)
+    if os.path.isfile(config['PATH']['path_train']) == False:
+        #load and preprocess the raw data
+        vocab = load_raw_file(config)
+    else:
+        vocab = get_vocab(config)
+
 
     # train
     if args.train:

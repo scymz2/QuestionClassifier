@@ -42,7 +42,7 @@ class File_loader:
         with open(self.raw_path, 'r') as f:
             for line in f:
                 self.raw_sentences.append(line)
-                line = line.strip('\n')  # lowercase and remove \n
+                line = line.lower().strip('\n')  # lowercase and remove \n
                 result = line.split(' ', 1)
                 if stop_path != '':
                     result[1] = self.remove_stopwords(result[1])
@@ -155,7 +155,7 @@ class File_loader:
         # encode sentences
         assert len(self.words) > 0, "Please read the raw data!"
         assert len(self.vocab) > 0, "Please read the vocabulary!"
-        self.word2idx = {w: idx for idx, w in enumerate(self.vocab)}
+        self.word2idx = {w: idx+1 for idx, w in enumerate(self.vocab)}
         self.encoded_sentences = [[self.word2idx[w] for w in word] for word in self.words]
         # encode labels
         self.label2idx = {l: idx for idx, l in enumerate(self.all_labels)}
@@ -168,7 +168,7 @@ class File_loader:
         # put the encoded labels and sentences together
         for i in range(len(self.encoded_labels)):
             en_sen = torch.LongTensor(self.encoded_sentences[i])
-            # en_lab = torch.LongTensor([self.encoded_labels[i]])
+            # en_lab = torch.LongTensor(self.encoded_labels[i])
             en_lab = self.encoded_labels[i]
             data_pair = (en_sen, en_lab)
             self.encoded_data.append(data_pair)

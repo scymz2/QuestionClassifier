@@ -109,11 +109,12 @@ so
 than
 too
 very
-s
-t
+'s
+'t
 can
 will
 just
 don
 should
 now
+n't
