@@ -49,7 +49,7 @@ def compute_acc(outputs, labels):
         return acc
 
 
-def train(config, vocab, batch_size=50, num_epoch=15, mode='develop'):
+def train(config, vocab, batch_size=40, num_epoch=11, mode='develop'):
     train_data = get_encoded_data(config['PATH']['path_train'], config['PATH']['path_vocab'], config['PARAMETER']['padding'])
 
     dev_data = get_encoded_data(config['PATH']['path_dev'], config['PATH']['path_vocab'], config['PARAMETER']['padding'])
@@ -108,25 +108,25 @@ def train(config, vocab, batch_size=50, num_epoch=15, mode='develop'):
             iters += 1
         epoch += 1
 
-        if mode == 'develop':
-            epoch = 0
-            iters = 0
-            val_accs = []
-            for epoch in range(num_epoch):
-                for val_features, val_labels in iter(val_loader):
-                    # drop last batch
-                    if len(val_labels) != batch_size:
-                        continue
+    if mode == 'develop':
+        epoch = 0
+        iters = 0
+        val_accs = []
+        for epoch in range(num_epoch):
+            for val_features, val_labels in iter(val_loader):
+                # drop last batch
+                if len(val_labels) != batch_size:
+                    continue
 
-                    outputs = model(val_features)
-                    val_acc = compute_acc(outputs, val_labels)
-                    val_accs.append(val_acc)  # validation accuracy
+                outputs = model(val_features)
+                val_acc = compute_acc(outputs, val_labels)
+                val_accs.append(val_acc)  # validation accuracy
 
-                    # print information
-                    if mode == 'develop':
-                        print('Epoch: ' + str(epoch) +
-                              ' Validation Set Accuracy: ' + str(val_acc)
-                              )
+                # print information
+                if mode == 'develop':
+                    print('Epoch: ' + str(epoch) +
+                          ' Validation Set Accuracy: ' + str(val_acc)
+                          )
 
 def test(config):
     pass
