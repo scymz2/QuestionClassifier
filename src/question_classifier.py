@@ -56,11 +56,12 @@ def train(config, vocab):
     pre_train_loader = Pre_train_loader()
     pre_train_weight = pre_train_loader.get_weight(config['PATH']['path_pre_train'], vocab)
     vocab_size = len(vocab)+1
+    # print(pre_train_weight)
 
     model = Model(model=config['SETTING']['model'],
                   pre_train_weight=pre_train_weight,
-                  pre_train=(config['SETTING']['pre_train']==True),
-                  freeze=(config['SETTING']['freeze']==True),
+                  pre_train=(config['SETTING']['pre_train']=='True'),
+                  freeze=(config['SETTING']['freeze']=='True'),
                   embedding_dim=int(config['STRUCTURE']['embedding_dim']),
                   vocab_size=vocab_size,
                   hidden_dim_bilstm=int(config['STRUCTURE']['hidden_dim_bilstm']),
