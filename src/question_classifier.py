@@ -82,6 +82,7 @@ def train(config, vocab):
     for epoch in range(num_epoch):
         for train_features, train_labels in iter(train_loader):
             output = model(train_features)
+            print(output)
             loss = criterion(output, train_labels)                    # compute loss
 
             loss.backward()                                         # backward pass
