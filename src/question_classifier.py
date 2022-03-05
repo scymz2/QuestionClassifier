@@ -17,53 +17,40 @@ random.seed(1)
 
 def load_raw_file(config):
     loader = File_loader()
-    loader.read_file(config['PATH']['path_raw'], '')
+    loader.read_file(config['PATH']['path_raw'], config['PATH']['path_stopwords'])
     loader.split_dataset(config['PATH']['path_train'], config['PATH']['path_dev'])
     loader.create_vocab_and_label(config['PATH']['path_vocab'],config['PATH']['path_label'])
-    # loader.create_vocab(config['PATH']['path_vocab'])
     vocab = loader.vocab
 
     return vocab
 
-def get_encoded_data(path_file, path_vocab,path_label, padding):
+def get_encoded_data(path_file, path_vocab,path_label, path_stop, padding):
     loader = File_loader()
-    loader.read_file(path_file,'')
+    loader.read_file(path_file,path_stop)
     loader.read_vocab_and_label(path_vocab, path_label)
-    # loader.read_vocab(path_vocab)
     data = loader.get_encoded_data(int(padding))
-    # print(data)
 
     return data
 
 
-# def compute_acc(model, data_loader):
-#     correct = 0
-#     total = 0
-#     for features, labels in data_loader:
-#         outputs = model(features)
-#         pred = outputs.max(1, keepdim=True)[1]
-#         correct += pred.eq(labels.view_as(pred)).sum().item()
-#         total += features.shape[0]
-#         return correct / total
-
 def compute_acc(outputs, target):
-        pred = outputs.max(1, keepdim=True)[1]
-        # target = labels.max(1,keepdim=True)[1]
-        acc = metrics.accuracy_score(target, pred)
-        f1_score = metrics.f1_score(target, pred, average=None)
-        return acc, f1_score
-
+    # print(outputs)
+    pred = outputs.max(1, keepdim=True)[1]
+    pred = torch.reshape(pred,(1,len(pred)))[0]
+    # print(target)
+    # print(pred)
+    acc = metrics.accuracy_score(target, pred)
+    f1_score = metrics.f1_score(target, pred, average=None)
+    return acc, f1_score
 
 def train(config, vocab):
-    train_data= get_encoded_data(config['PATH']['path_train'], config['PATH']['path_vocab'], config['PATH']['path_label'], config['SETTING']['padding'])
+    train_data= get_encoded_data(config['PATH']['path_train'], config['PATH']['path_vocab'], config['PATH']['path_label'],  config['PATH']['path_stopwords'], config['SETTING']['padding'])
 
-    dev_data= get_encoded_data(config['PATH']['path_dev'], config['PATH']['path_vocab'], config['PATH']['path_label'], config['SETTING']['padding'])
+    # dev_data= get_encoded_data(config['PATH']['path_dev'], config['PATH']['path_vocab'], config['PATH']['path_label'], config['PATH']['path_stopwords'],config['SETTING']['padding'])
 
     pre_train_loader = Pre_train_loader()
     pre_train_weight = pre_train_loader.get_weight(config['PATH']['path_pre_train'], vocab)
     vocab_size = len(vocab)
-
-    # print(train_data)
 
     model = Model(model=config['SETTING']['model'],
                   pre_train_weight=pre_train_weight,
@@ -89,26 +76,18 @@ def train(config, vocab):
     losses, train_accs = [], []
     for epoch in range(num_epoch):
         for train_features, train_labels in iter(train_loader):
-            # print(train_labels)
-            # train model
-            # print(train_features)
-            # print(train_labels)
             output = model(train_features)
-            # print(train_labels.shape[0])
-
-            # print(torch.max(train_labels, 1)[1])# forward pass
+            # print(output)
             loss = criterion(output, train_labels)                    # compute loss
-
             loss.backward()                                         # backward pass
             optimizer.step()                                        # update weights
             optimizer.zero_grad()                                   # clean gradients
 
             # record training information
-            # num_iters.append(epoch)                                 # counts of iterations
             losses.append(float(loss/batch_size))                   # average loss of the batch
-            # train_acc = accuracy_score(train_labels, output)
-            # train_accs.append(train_acc)                            # training accuracy
-            # train_acc, train_f1 = compute_acc(output, train_labels)
+            train_acc = compute_acc(output, train_labels)
+            train_accs.append(train_acc)                            # training accuracy
+            train_acc, train_f1 = compute_acc(output, train_labels)
 
         # model_path = str('../data/model.' + config['PATH'][config['SETTING']['model']])
         # torch.save(model, model_path)
@@ -117,8 +96,7 @@ def train(config, vocab):
 
         # print information
         # print('Epoch: ' + epoch + '\nTrain: Accuracy: ' + train_acc + ', F1_score: ', + train_f1, + '\nValidation: Accuracy: '+ dev_acc, +', F1_score' + dev_f1)
-        # print('Epoch: ' + epoch + 'Train: Accuracy: ' + train_acc + ', F1_score: ', + train_f1)
-        print(epoch)
+        print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', F1_score: ', train_f1)
 
 def test(config):
     pass

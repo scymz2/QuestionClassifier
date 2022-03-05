@@ -7,15 +7,15 @@ from classifier import*
 class Model(nn.Module):
     def __init__(self,
                  model,
-                 pre_train,
-                 freeze,
-                 pre_train_weight,
-                 vocab_size,
-                 embedding_dim,
-                 hidden_dim_bilstm,
-                 n_input,
-                 n_hidden,
-                 n_output):
+                 pre_train=True,
+                 freeze=False,
+                 pre_train_weight=[],
+                 vocab_size=0,
+                 embedding_dim=300,
+                 hidden_dim_bilstm=300,
+                 n_input=50,
+                 n_hidden=50,
+                 n_output=50):
 
         super().__init__()
 
