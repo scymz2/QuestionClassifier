@@ -23,8 +23,9 @@ class BiLSTM(nn.Module):
         # self.hidden2sent = nn.Linear(hidden_dim, embedding_dim)
 
     def forward(self, sentence):
+        batch_size = sentence.shape[0]
         embeds = self.word_embeddings(sentence)
-        bilstm_out,_ = self.bilstm(embeds.view(len(sentence[0]),embeds.shape[0],-1))
+        bilstm_out,_ = self.bilstm(embeds.view(len(sentence[0]),batch_size,-1))
         out = bilstm_out[-1]
         # out = self.hidden2sent(lstm_out.view())
         return out
