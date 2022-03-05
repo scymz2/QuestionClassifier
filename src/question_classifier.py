@@ -34,11 +34,8 @@ def get_encoded_data(path_file, path_vocab,path_label, path_stop, padding):
 
 
 def compute_acc(outputs, target):
-    # print(outputs)
     pred = outputs.max(1, keepdim=True)[1]
     pred = torch.reshape(pred,(1,len(pred)))[0]
-    # print(target)
-    # print(pred)
     acc = metrics.accuracy_score(target, pred)
     f1_score = metrics.f1_score(target, pred, average=None)
     return acc, f1_score
@@ -58,7 +55,7 @@ def train(config, vocab):
                   freeze=(config['SETTING']['freeze']==True),
                   embedding_dim=int(config['STRUCTURE']['embedding_dim']),
                   vocab_size=vocab_size,
-                  hidden_dim_bilstm=config['STRUCTURE']['hidden_dim_bilstm'],
+                  hidden_dim_bilstm=int(config['STRUCTURE']['hidden_dim_bilstm']),
                   n_input=int(config['STRUCTURE']['n_input']),
                   n_hidden=int(config['STRUCTURE']['n_hidden']),
                   n_output=int(config['STRUCTURE']['n_output'])
@@ -72,7 +69,8 @@ def train(config, vocab):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-
+    outs = []
+    targets = []
     losses, train_accs = [], []
     for epoch in range(num_epoch):
         for train_features, train_labels in iter(train_loader):
@@ -83,11 +81,14 @@ def train(config, vocab):
             optimizer.step()                                        # update weights
             optimizer.zero_grad()                                   # clean gradients
 
+            outs.append(output)
+            targets.append(train_labels)
             # record training information
             losses.append(float(loss/batch_size))                   # average loss of the batch
-            train_acc = compute_acc(output, train_labels)
-            train_accs.append(train_acc)                            # training accuracy
+            # train_acc = compute_acc(output, train_labels)
+            # train_accs.append(train_acc)                            # training accuracy
             train_acc, train_f1 = compute_acc(output, train_labels)
+            print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', F1_score: ', train_f1)
 
         # model_path = str('../data/model.' + config['PATH'][config['SETTING']['model']])
         # torch.save(model, model_path)
@@ -96,7 +97,7 @@ def train(config, vocab):
 
         # print information
         # print('Epoch: ' + epoch + '\nTrain: Accuracy: ' + train_acc + ', F1_score: ', + train_f1, + '\nValidation: Accuracy: '+ dev_acc, +', F1_score' + dev_f1)
-        print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', F1_score: ', train_f1)
+        # print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', F1_score: ', train_f1)
 
 def test(config):
     pass

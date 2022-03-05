@@ -16,14 +16,16 @@ class BiLSTM(nn.Module):
         self.hidden_dim = hidden_dim
 
         if pre_train == True:
-            self.word_embeddings = nn.embedding.from_pretrained(pre_train_weight,freeze=freeze)
+            self.word_embeddings = nn.Embedding.from_pretrained(pre_train_weight,freeze=freeze)
         else:
-            self.word_embeddings = nn.embedding(vocab_size, embedding_dim)
+            self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, bidirectional=True)
+        self.hidden2sent = nn.Linear(hidden_dim, embedding_dim)
 
     def forward(self, sentence):
         embeds = self.word_embeddings(sentence)
-        lstm_out, _ = self.lstm(embeds.view(len(sentence), 1, -1))
+        lstm_out, _ = self.lstm(embeds.view(len(sentence[0]),sentence.shape[0], -1))
+        out = self.hidden2sent(lstm_out)
 
-        return lstm_out
+        return out
