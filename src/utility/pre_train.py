@@ -6,6 +6,7 @@
 
 from collections import Counter
 import torch
+import numpy as np
 
 
 class Pre_train_loader:
@@ -31,6 +32,8 @@ class Pre_train_loader:
         # only keep the words that appear in current text, others will be marked with #UNK#
         weight_unk = self.pretrain_dict['#unk#'].split(' ')
         weight_unk = [float(w) for w in weight_unk]
+
+        self.pretrain_weight.append(list(np.zeros(len(weight_unk))))
         for word in vocab:
             if word in self.pretrain_dict:
                 weight = self.pretrain_dict[word].split(' ')

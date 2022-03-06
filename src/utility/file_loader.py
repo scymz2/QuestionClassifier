@@ -185,7 +185,7 @@ class File_loader:
         # encode sentences
         assert len(self.words) > 0, "Please read the raw data!"
         assert len(self.vocab) > 0, "Please read the vocabulary!"
-        self.word2idx = {w: idx for idx, w in enumerate(self.vocab)}
+        self.word2idx = {w: idx+1 for idx, w in enumerate(self.vocab)}
         # If it is test file, mark the unknown words with #unk# rather than index
         # if test:
         for words in self.words:
