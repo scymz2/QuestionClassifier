@@ -136,6 +136,7 @@ class File_loader:
             with open(vocab_path, 'w') as f:
                 for i in range(self.vocab_size):
                     f.write(self.vocab[i] + '\n')
+                f.write('#unk#')
 
         self.all_labels = Counter(self.labels)
         self.all_labels = sorted(self.all_labels, key=self.all_labels.get, reverse=True)
@@ -146,7 +147,36 @@ class File_loader:
                 for i in range(self.num_of_labels):
                     f.write(self.all_labels[i] + '\n')
 
-    def get_encoded_data(self, padding,):
+    # def get_encoded_data(self, padding,):
+    #     """
+    #     This function encodes the sentences and labels
+    #     :return: The encoded data in the format of
+    #     [([encoded sentence], encoded label),...] -> example. [([3,1,4,5], 2),...]
+    #     """
+    #     # encode sentences
+    #     assert len(self.words) > 0, "Please read the raw data!"
+    #     assert len(self.vocab) > 0, "Please read the vocabulary!"
+    #     self.word2idx = {w: idx for idx, w in enumerate(self.vocab)}
+    #     self.encoded_sentences = [[self.word2idx[w] for w in word] for word in self.words]
+    #     # encode labels
+    #     self.label2idx = {l: idx for idx, l in enumerate(self.all_labels)}
+    #     # self.encoded_labels = [self.idx_2_array(self.label2idx[label]) for label in self.labels]
+    #     self.encoded_labels = [self.label2idx[label] for label in self.labels]
+    #     # padding for the short sentences
+    #     for en_sen in self.encoded_sentences:
+    #         while len(en_sen) < padding:
+    #             en_sen.append(0)
+    #     # put the encoded labels and sentences together
+    #     for i in range(len(self.encoded_labels)):
+    #         en_sen = torch.LongTensor(self.encoded_sentences[i])
+    #         # en_lab = torch.LongTensor(self.encoded_labels[i])
+    #         en_lab = self.encoded_labels[i]
+    #         data_pair = (en_sen, en_lab)
+    #         self.encoded_data.append(data_pair)
+    #
+    #     return self.encoded_data
+
+    def get_encoded_data(self, padding):
         """
         This function encodes the sentences and labels
         :return: The encoded data in the format of
@@ -155,11 +185,22 @@ class File_loader:
         # encode sentences
         assert len(self.words) > 0, "Please read the raw data!"
         assert len(self.vocab) > 0, "Please read the vocabulary!"
-        self.word2idx = {w: idx+1 for idx, w in enumerate(self.vocab)}
-        self.encoded_sentences = [[self.word2idx[w] for w in word] for word in self.words]
+        self.word2idx = {w: idx for idx, w in enumerate(self.vocab)}
+        # If it is test file, mark the unknown words with #unk# rather than index
+        # if test:
+        for words in self.words:
+            en_sen = []
+            for word in words:
+                if word not in self.vocab:
+                    en_sen.append(self.word2idx['#unk#'])
+                else:
+                    en_sen.append(self.word2idx[word])
+            self.encoded_sentences.append(en_sen)
+        # else:
+        #     self.encoded_sentences = [[self.word2idx[w] for w in word] for word in self.words]
+
         # encode labels
         self.label2idx = {l: idx for idx, l in enumerate(self.all_labels)}
-        # self.encoded_labels = [self.idx_2_array(self.label2idx[label]) for label in self.labels]
         self.encoded_labels = [self.label2idx[label] for label in self.labels]
         # padding for the short sentences
         for en_sen in self.encoded_sentences:
@@ -168,7 +209,7 @@ class File_loader:
         # put the encoded labels and sentences together
         for i in range(len(self.encoded_labels)):
             en_sen = torch.LongTensor(self.encoded_sentences[i])
-            # en_lab = torch.LongTensor(self.encoded_labels[i])
+            # en_lab = torch.LongTensor([self.encoded_labels[i]])
             en_lab = self.encoded_labels[i]
             data_pair = (en_sen, en_lab)
             self.encoded_data.append(data_pair)

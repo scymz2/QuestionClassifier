@@ -54,9 +54,8 @@ def train(config, vocab):
     dev_data= get_encoded_data(config['PATH']['path_dev'], config['PATH']['path_vocab'], config['PATH']['path_label'], config['PATH']['path_stopwords'],config['SETTING']['padding'])
 
     pre_train_loader = Pre_train_loader()
-    pre_train_weight = pre_train_loader.get_weight(config['PATH']['path_pre_train'], vocab)
-    vocab_size = len(vocab)+1
-    # print(pre_train_weight)
+    pre_train_weight = pre_train_loader.load_pretrain(config['PATH']['path_pre_train'], vocab)
+    vocab_size = len(vocab)
 
     model = Model(model=config['SETTING']['model'],
                   pre_train_weight=pre_train_weight,
