@@ -53,6 +53,13 @@ def train(config, vocab):
 
     dev_data= get_encoded_data(config['PATH']['path_dev'], config['PATH']['path_vocab'], config['PATH']['path_label'], config['PATH']['path_stopwords'],config['SETTING']['padding'])
 
+
+    test_data = get_encoded_data(config['PATH']['path_test'], config['PATH']['path_vocab'],
+                                 config['PATH']['path_label'], config['PATH']['path_stopwords'],
+                                 config['SETTING']['padding'])
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=len(test_data))
+
+
     pre_train_loader = Pre_train_loader()
     pre_train_weight = pre_train_loader.load_pretrain(config['PATH']['path_pre_train'], vocab)
     vocab_size = len(vocab)
@@ -114,8 +121,15 @@ def train(config, vocab):
         # dev_acc = dev_acc_tatal/itr
         print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, 'Validation Accuracy: ', dev_acc)
 
-        model_path = config['PATH']['path_model']
-        torch.save(model, model_path)
+
+        for test_feats, test_labels in iter(test_loader):
+            out = model(test_feats)
+            test_acc, test_f1 = compute_acc(out, test_labels)
+
+        print('Test Accuracy: ', test_acc)
+
+    model_path = config['PATH']['path_model']
+    torch.save(model, model_path)
 
 
 def test(config):
@@ -125,8 +139,6 @@ def test(config):
                                   config['SETTING']['padding'])
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=len(test_data))
 
-    # test_acc = 0
-    # itr = 0
     for test_feats, test_labels in iter(test_loader):
         out = model(test_feats)
         test_acc, test_f1 = compute_acc(out, test_labels)

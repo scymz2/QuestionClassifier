@@ -17,9 +17,9 @@ class BoW(nn.Module):
 
         super().__init__()
         if pre_train == True:
-            self.bag_of_words = nn.EmbeddingBag.from_pretrained(pre_train_weight, freeze=freeze, mode='mean', padding_idx=0)
+            self.bag_of_words = nn.EmbeddingBag.from_pretrained(pre_train_weight, freeze=freeze, mode='mean')
         else:
-            self.bag_of_words = nn.EmbeddingBag(vocab_size, embedding_dim, mode='mean', padding_idx=0)
+            self.bag_of_words = nn.EmbeddingBag(vocab_size, embedding_dim, mode='mean')
 
         # if pre_train == True:
         #     self.embedding = nn.Embedding.from_pretrained(pre_train_weight, freeze=freeze, padding_idx=0)
