@@ -12,6 +12,8 @@ class File_loader:
         self.stop_path = ''
         self.stopwords = []
         self.labels = []
+        self.all_labels = []
+        self.num_of_labels = 0
         self.sentences = []
         self.raw_sentences = []
         self.words = []
@@ -24,15 +26,16 @@ class File_loader:
         self.encoded_labels = []
         self.encoded_data = []
 
-    def read_file(self, raw_path, stop_path=''):
+    def read_file(self, path, stop_path=''):
         """
-        read the raw questions from the question file raw_data.txt
+        read the original questions from the path file,
+        and remove the stopwords from the stopwords file.
         input empty string if the stopwords are not needed
-        and split the data into label part and sentence part
-        :param raw_path: The path to the raw question file
+        and split the data into label part and sentence part, store them in the object.
+        :param path: The path question file (raw /train /dev /test...)
         :param stop_path: The path to the stopwords file
         """
-        self.raw_path = raw_path
+        self.raw_path = path
         self.stop_path = stop_path
         # read the stopwords if required
         if stop_path != '':
@@ -40,7 +43,7 @@ class File_loader:
         with open(self.raw_path, 'r') as f:
             for line in f:
                 self.raw_sentences.append(line)
-                line = line.strip('\n')  # lowercase and remove \n
+                line = line.lower().strip('\n')  # lowercase and remove \n
                 result = line.split(' ', 1)
                 if stop_path != '':
                     result[1] = self.remove_stopwords(result[1])
@@ -98,33 +101,53 @@ class File_loader:
             for j in range(len(dev_data)):
                 f2.write(dev_data[j].strip('\n') + '\n')
 
-    def read_vocab(self, path):
+    def read_vocab_and_label(self, vocab_path, label_path):
         """
-        This function reads vocabulary file
-        :param path: The path to vocabulary.txt
+        This function reads vocabulary file/labels file
+        :param label_path: The path to the labels.txt
+        :param vocab_path: The path to the vocabulary.txt
         :return:
         """
-        with open(path, 'r') as f:
+        with open(vocab_path, 'r') as f:
             for line in f:
                 self.vocab.append(line.strip('\n'))
 
-    def create_vocab(self, path=''):
+        with open(label_path, 'r') as f:
+            for line in f:
+                self.all_labels.append(line.strip('\n'))
+        self.num_of_labels = len(self.all_labels)
+
+    def create_vocab_and_label(self, vocab_path='', label_path=''):
         """
-        This function creates the vocabulary for the raw_data.txt
-        and store the vocabularies in the vocabulary.txt
+        This function creates the vocabulary/labels for the raw_data.txt
+        and store the vocabularies in the vocabulary.txt/ labels.txt
         NOTE THAT THIS FUNCTION IS ONLY FOR THE raw_data.txt
-        :param path: The path to store the vocabulary.txt
+        :param vocab_path: The path to store the vocabulary.txt
+        :param label_path: The path to store the labels.txt
         """
-        assert len(self.words) > 0, "Please read the raw data then call this function"
+        assert len(self.words) > 0, "Please read the raw data or vocabulary file"
+        assert len(self.labels) > 0, "Please read the raw data or labels file"
+
         words = sum(self.words, [])
         self.vocab = Counter(words)
         self.vocab = sorted(self.vocab, key=self.vocab.get, reverse=True)
+        self.vocab.append('')
         self.vocab_size = len(self.vocab)
-        if path != '':
+        if vocab_path != '':
             # store vocabulary if path is not empty
-            with open(path, 'w') as f:
+            with open(vocab_path, 'w') as f:
                 for i in range(self.vocab_size):
                     f.write(self.vocab[i] + '\n')
+                f.write('#unk#')
+
+        self.all_labels = Counter(self.labels)
+        self.all_labels = sorted(self.all_labels, key=self.all_labels.get, reverse=True)
+        self.num_of_labels = len(self.all_labels)
+        if label_path != '':
+            # store vocabulary if path is not empty
+            with open(label_path, 'w') as f:
+                for i in range(self.num_of_labels):
+                    f.write(self.all_labels[i] + '\n')
 
     def get_encoded_data(self, padding):
         """
@@ -135,23 +158,33 @@ class File_loader:
         # encode sentences
         assert len(self.words) > 0, "Please read the raw data!"
         assert len(self.vocab) > 0, "Please read the vocabulary!"
-        self.word2idx = {w: idx for idx, w in enumerate(self.vocab)}
-        self.encoded_sentences = [[self.word2idx[w] for w in word] for word in self.words]
+        self.word2idx = {w: idx+1 for idx, w in enumerate(self.vocab)}
+        # If it is test file, mark the unknown words with #unk# rather than index
+        # if test:
+        for words in self.words:
+            en_sen = []
+            for word in words:
+                if word not in self.vocab:
+                    en_sen.append(self.word2idx['#unk#'])
+                else:
+                    en_sen.append(self.word2idx[word])
+            self.encoded_sentences.append(en_sen)
+        # else:
+        #     self.encoded_sentences = [[self.word2idx[w] for w in word] for word in self.words]
+
         # encode labels
-        labels = Counter(self.labels)
-        labels = sorted(labels, key=labels.get, reverse=True)
-        self.label2idx = {l: idx for idx, l in enumerate(labels)}
+        self.label2idx = {l: idx for idx, l in enumerate(self.all_labels)}
         self.encoded_labels = [self.label2idx[label] for label in self.labels]
         # padding for the short sentences
         for en_sen in self.encoded_sentences:
             while len(en_sen) < padding:
-                en_sen.append(-1)
+                en_sen.append(0)
         # put the encoded labels and sentences together
         for i in range(len(self.encoded_labels)):
             en_sen = torch.LongTensor(self.encoded_sentences[i])
-            en_lab = torch.LongTensor([self.encoded_labels[i]])
+            # en_lab = torch.LongTensor([self.encoded_labels[i]])
+            en_lab = self.encoded_labels[i]
             data_pair = (en_sen, en_lab)
             self.encoded_data.append(data_pair)
 
         return self.encoded_data
-
