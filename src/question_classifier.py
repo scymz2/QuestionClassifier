@@ -160,6 +160,11 @@ def test(config):
                                   config['SETTING']['padding'])
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=int(config['STRUCTURE']['batch_size']))
 
+    labels = []
+    with open(config['PATH']['path_label'], 'r') as f:
+        for line in f:
+            labels.append(line.strip('\n'))
+
     test_out = torch.tensor([])
     test_label = torch.tensor([])
     for test_feats, test_labels in iter(test_loader):
@@ -168,7 +173,16 @@ def test(config):
         test_label = torch.cat((test_label, test_labels))
 
     test_acc, test_f1 = compute_acc(test_out, test_label)
+    pred = test_out.max(1,keepdim=True)[1]
+    with open(config['PATH']['path_output'], 'w') as f:
+        for p in pred:
+            f.write(labels[p] + '\n')
+        f.write('\nAccuracy:' + str(test_acc))
+        f.write('\nF1 score:' + str(test_f1))
+
     print('Test Accuracy: ', test_acc, ', Test f1: ', test_f1)
+
+
 
 
 if __name__ == "__main__":
@@ -184,12 +198,15 @@ if __name__ == "__main__":
     config.sections()
     config.read(config_path)
 
+    # if the train and validation sets have not been split,
+    # read the raw file, split the data and create the vocabulary and label file.
+    # if the train and vali sets have been splitted, read the vocabulary file and get the vocabulary
+
     if os.path.isfile(config['PATH']['path_train']) == False:
         #load and preprocess the raw data
         vocab = load_raw_file(config)
     else:
         vocab = get_vocab(config)
-
 
     # train
     if args.train:

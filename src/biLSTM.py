@@ -22,10 +22,10 @@ class BiLSTM(nn.Module):
         self.bilstm = nn.LSTM(embedding_dim, hidden_dim_bilstm, bidirectional=True)
 
     def forward(self, sentence):
+        # batch_size = sentence.shape[0]
 
         embeds = self.word_embeddings(sentence)
-        embeds = embeds.transpose(0,1)
-        bilstm_out, _ = self.bilstm(embeds)
+        bilstm_out, _ = self.bilstm(embeds.transpose(0,1))
 
         back = bilstm_out[0, :, self.hidden_dim_bilstm:]
         forward = bilstm_out[len(sentence[0]) - 1, :, :self.hidden_dim_bilstm]
