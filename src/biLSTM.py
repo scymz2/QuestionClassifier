@@ -38,7 +38,7 @@ class BiLSTM(nn.Module):
         embeds = self.word_embeddings(sentence)
 
         bilstm_out,_= self.bilstm(embeds.view(len(sentence[0]),batch_size,-1))
-        back = bilstm_out[len(embeds[0]) - 1, :, self.hidden_dim_bilstm:]
+        back = bilstm_out[0, :, self.hidden_dim_bilstm:]
         forward = bilstm_out[len(embeds[0]) - 1, :, :self.hidden_dim_bilstm]
 
         out = torch.cat((forward,back), dim=0).view(embeds.shape[0], -1)

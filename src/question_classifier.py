@@ -122,7 +122,7 @@ def train(config, vocab):
             train_accs.append(acc)
             train_out = torch.cat((train_out, output), 0)
             train_label = torch.cat((train_label, train_labels))
-            print('Epoch: ', epoch, 'Train: Accuracy: ', acc)
+            # print('Epoch: ', epoch, 'Train: Accuracy: ', acc)
 
         train_acc, train_f1 = compute_acc(train_out, train_label)
         print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', Train f1: ', train_f1)
