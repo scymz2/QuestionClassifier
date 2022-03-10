@@ -26,7 +26,7 @@ def load_raw_file(config):
     loader.read_file(config['PATH']['path_raw'], config['PATH']['path_stopwords'])
     loader.split_dataset(config['PATH']['path_train'], config['PATH']['path_dev'])
     loader.create_vocab_and_label(config['PATH']['path_vocab'],config['PATH']['path_label'])
-    vocab = loader.vocab
+    vocab = get_vocab(config)
 
     return vocab
 
@@ -102,8 +102,8 @@ def train(config, vocab):
 
     # criterion = nn.CrossEntropyLoss()
     criterion = nn.NLLLoss()
-    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-
+    # optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
     losses, train_accs = [], []
 
     for epoch in range(num_epoch):
@@ -111,6 +111,8 @@ def train(config, vocab):
         train_label = torch.tensor([])
 
         for train_features, train_labels in iter(train_loader):
+            if len(train_labels) != batch_size:
+                continue
             output = model(train_features)
             loss = criterion(output, train_labels)                    # compute loss
             loss.backward()                                         # backward pass
@@ -125,7 +127,7 @@ def train(config, vocab):
             # print('Epoch: ', epoch, 'Train: Accuracy: ', acc)
 
         train_acc, train_f1 = compute_acc(train_out, train_label)
-        print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', Train f1: ', train_f1)
+        print('Epoch: ', epoch, '\nTrain: Accuracy: ', train_acc, ', Train f1: ', train_f1)
 
         dev_out = torch.tensor([])
         dev_label = torch.tensor([])
@@ -156,7 +158,7 @@ def test(config):
     test_data = get_encoded_data(config['PATH']['path_test'], config['PATH']['path_vocab'],
                                   config['PATH']['path_label'], config['PATH']['path_stopwords'],
                                   config['SETTING']['padding'])
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=config['STRUCTURE']['batch_size'])
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=int(config['STRUCTURE']['batch_size']))
 
     test_out = torch.tensor([])
     test_label = torch.tensor([])

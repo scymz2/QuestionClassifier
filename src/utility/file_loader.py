@@ -131,6 +131,7 @@ class File_loader:
         words = sum(self.words, [])
         self.vocab = Counter(words)
         self.vocab = sorted(self.vocab, key=self.vocab.get, reverse=True)
+        self.vocab.append('')
         self.vocab_size = len(self.vocab)
         if vocab_path != '':
             # store vocabulary if path is not empty
