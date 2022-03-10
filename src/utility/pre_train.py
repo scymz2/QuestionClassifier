@@ -1,11 +1,8 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-
-from collections import Counter
 import torch
+import numpy as np
 
 
 class Pre_train_loader:
@@ -23,14 +20,16 @@ class Pre_train_loader:
         with open(path, 'r') as f:
             for line in f:
                 line = line.split('\t')  # '#UNK#'  '-2.190000 -1.02137....'
-                label = line[0]  # '#UNK#'
+                label = line[0].lower()  # '#UNK#'
                 vector = line[1]  # '-2.19....'
                 # create a dictionary for the words and vectors
                 self.pretrain_dict[label] = vector  # key-value
 
         # only keep the words that appear in current text, others will be marked with #UNK#
-        weight_unk = self.pretrain_dict['#UNK#'].split(' ')
+        weight_unk = self.pretrain_dict['#unk#'].split(' ')
         weight_unk = [float(w) for w in weight_unk]
+
+        self.pretrain_weight.append(list(np.zeros(len(weight_unk))))
         for word in vocab:
             if word in self.pretrain_dict:
                 weight = self.pretrain_dict[word].split(' ')
@@ -38,4 +37,4 @@ class Pre_train_loader:
                 self.pretrain_weight.append(weight)
             else:
                 self.pretrain_weight.append(weight_unk)
-            return torch.FloatTensor(self.pretrain_weight)
+        return torch.FloatTensor(self.pretrain_weight)

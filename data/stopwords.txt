@@ -27,10 +27,6 @@ them
 their
 theirs
 themselves
-what
-which
-who
-whom
 this
 that
 these
@@ -93,10 +89,6 @@ then
 once
 here
 there
-when
-where
-why
-how
 all
 any
 both
@@ -117,11 +109,12 @@ so
 than
 too
 very
-s
-t
+'s
+'t
 can
 will
 just
 don
 should
 now
+n't
