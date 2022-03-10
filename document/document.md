@@ -4,7 +4,7 @@ This document describes all the important functions in the source code, in the o
 # Preprocess
 The codes for preprocessing are located in the folder 'utility'. 'file_loader.py' is for the data preprocessing, and 'pre_train.py' preprocesses the pre-train weight.
 
-###file_loader.py 
+##file_loader.py 
 
 This class contains functions of reading the file, lowercase the data, removing stopwords, splitting the raw dataset, create the vocabulary file and label file, and encoding sentences and labels. After creating an object of this class and passing the path to the inside function 'read_file', we can do other preprocessing stops for the target data file using the object and its functions.
 
