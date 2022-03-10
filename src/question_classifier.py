@@ -17,6 +17,11 @@ torch.manual_seed(1)
 random.seed(1)
 
 def load_raw_file(config):
+    '''
+    create a File_loader object,
+    in order to read the raw data file, create the vocabulary and label file, and split the data into train set and validation set.
+    :return: the whole vocabulary (from the raw data)
+    '''
     loader = File_loader()
     loader.read_file(config['PATH']['path_raw'], config['PATH']['path_stopwords'])
     loader.split_dataset(config['PATH']['path_train'], config['PATH']['path_dev'])
@@ -26,6 +31,9 @@ def load_raw_file(config):
     return vocab
 
 def get_vocab(config):
+    '''
+    read the existing vocabulary file and return the vocabulary
+    '''
     vocab = []
     with open(config['PATH']['path_vocab'], 'r') as f:
         for line in f:
@@ -33,6 +41,12 @@ def get_vocab(config):
     return vocab
 
 def get_encoded_data(path_file, path_vocab,path_label, path_stop, padding):
+    '''
+    create a File_loader object, in order to read the file (train/validation/test..)
+    and encode the labels and sentences in the file.
+    after encoding, add the paddings to make each sentence with the same length, padding=0.
+    :return: the encoded data
+    '''
     loader = File_loader()
     loader.read_file(path_file,path_stop)
     loader.read_vocab_and_label(path_vocab, path_label)
@@ -42,10 +56,13 @@ def get_encoded_data(path_file, path_vocab,path_label, path_stop, padding):
 
 
 def compute_acc(outputs, target):
+    '''
+    compute the accuracy and the f1_score of the model using sklearn.metrics.
+    '''
     pred = outputs.max(1, keepdim=True)[1]
     pred = torch.reshape(pred,(1,len(pred)))[0]
     acc = metrics.accuracy_score(target, pred)
-    f1_score = metrics.f1_score(target, pred, average=None)
+    f1_score = metrics.f1_score(target, pred, average='weighted')
     return acc, f1_score
 
 def train(config, vocab):
@@ -57,7 +74,6 @@ def train(config, vocab):
     test_data = get_encoded_data(config['PATH']['path_test'], config['PATH']['path_vocab'],
                                  config['PATH']['path_label'], config['PATH']['path_stopwords'],
                                  config['SETTING']['padding'])
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=len(test_data))
 
 
     pre_train_loader = Pre_train_loader()
@@ -81,52 +97,55 @@ def train(config, vocab):
     lr = float(config['PARAMETER']['lr'])
 
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size)
-    dev_loader = torch.utils.data.DataLoader(dev_data, batch_size=len(dev_data))
+    dev_loader = torch.utils.data.DataLoader(dev_data, batch_size=batch_size)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
 
-    criterion = nn.CrossEntropyLoss()
+    # criterion = nn.CrossEntropyLoss()
+    criterion = nn.NLLLoss()
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
     losses, train_accs = [], []
 
     for epoch in range(num_epoch):
-        train_acc_total = 0
-        itr = 0
+        train_out = torch.tensor([])
+        train_label = torch.tensor([])
+
         for train_features, train_labels in iter(train_loader):
             output = model(train_features)
             loss = criterion(output, train_labels)                    # compute loss
             loss.backward()                                         # backward pass
             optimizer.step()                                        # update weights
             optimizer.zero_grad()                                   # clean gradients
-
-            # record training information
             losses.append(float(loss)/batch_size)                   # average loss of the batch
-            acc, train_f1 = compute_acc(output, train_labels)
-            train_accs.append(acc)
-            train_acc_total += acc
-            # print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', F1_score: ', train_f1)
-            itr += 1
-            print('Epoch: ', epoch, 'Train: Accuracy: ', acc)
-        train_acc = train_acc_total/itr
 
+            acc, _ = compute_acc(output, train_labels)
+            train_accs.append(acc)
+            train_out = torch.cat((train_out, output), 0)
+            train_label = torch.cat((train_label, train_labels))
+            print('Epoch: ', epoch, 'Train: Accuracy: ', acc)
+
+        train_acc, train_f1 = compute_acc(train_out, train_label)
+        print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, ', Train f1: ', train_f1)
+
+        dev_out = torch.tensor([])
+        dev_label = torch.tensor([])
         for dev_feats, dev_labels in iter(dev_loader):
             out = model(dev_feats)
-            dev_acc,dev_f1 = compute_acc(out, dev_labels)
-        # dev_acc_tatal = 0
-        # itr = 0
-        # for dev_feats, dev_labels in iter(dev_loader):
-        #     out = model(dev_feats)
-        #     acc,_ = compute_acc(out, dev_labels)
-        #     dev_acc_tatal += acc
-        #     itr+=1
-        # dev_acc = dev_acc_tatal/itr
-        print('Epoch: ', epoch, 'Train: Accuracy: ', train_acc, 'Validation Accuracy: ', dev_acc)
+            dev_out = torch.cat((dev_out, out), 0)
+            dev_label = torch.cat((dev_label, dev_labels))
 
+        dev_acc, dev_f1 = compute_acc(dev_out, dev_label)
+        print('Validation Accuracy: ', dev_acc, ', Validation f1: ', dev_f1)
 
+        test_out = torch.tensor([])
+        test_label = torch.tensor([])
         for test_feats, test_labels in iter(test_loader):
             out = model(test_feats)
-            test_acc, test_f1 = compute_acc(out, test_labels)
+            test_out = torch.cat((test_out, out), 0)
+            test_label = torch.cat((test_label, test_labels))
 
-        print('Test Accuracy: ', test_acc)
+        test_acc, test_f1 = compute_acc(test_out, test_label)
+        print('Test Accuracy: ', test_acc, ', Test f1: ', test_f1)
 
     model_path = config['PATH']['path_model']
     torch.save(model, model_path)
@@ -137,13 +156,17 @@ def test(config):
     test_data = get_encoded_data(config['PATH']['path_test'], config['PATH']['path_vocab'],
                                   config['PATH']['path_label'], config['PATH']['path_stopwords'],
                                   config['SETTING']['padding'])
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=len(test_data))
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=config['STRUCTURE']['batch_size'])
 
+    test_out = torch.tensor([])
+    test_label = torch.tensor([])
     for test_feats, test_labels in iter(test_loader):
         out = model(test_feats)
-        test_acc, test_f1 = compute_acc(out, test_labels)
+        test_out = torch.cat((test_out, out), 0)
+        test_label = torch.cat((test_label, test_labels))
 
-    print('Test Accuracy: ', test_acc)
+    test_acc, test_f1 = compute_acc(test_out, test_label)
+    print('Test Accuracy: ', test_acc, ', Test f1: ', test_f1)
 
 
 if __name__ == "__main__":

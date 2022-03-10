@@ -1,10 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-
-from collections import Counter
 import torch
 import numpy as np
 

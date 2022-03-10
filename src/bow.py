@@ -21,15 +21,8 @@ class BoW(nn.Module):
         else:
             self.bag_of_words = nn.EmbeddingBag(vocab_size, embedding_dim, mode='mean', padding_idx=0)
 
-        # if pre_train == True:
-        #     self.embedding = nn.Embedding.from_pretrained(pre_train_weight, freeze=freeze, padding_idx=0)
-        # else:
-        #     self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=0)
-
     def forward(self, sentence):
         out = self.bag_of_words(sentence)
+
         return out
-        # out = self.embedding(sentence)
-        # out = torch.mean(out, dim=0)
-        #
-        # return out
+
