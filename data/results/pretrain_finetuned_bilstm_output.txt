@@ -39,7 +39,7 @@ num:dist
 num:count
 num:count
 enty:termeq
-desc:def
+desc:desc
 desc:def
 desc:def
 enty:termeq
@@ -69,7 +69,7 @@ enty:body
 num:date
 loc:other
 num:other
-num:count
+num:money
 loc:city
 hum:ind
 loc:other
@@ -500,4 +500,4 @@ enty:other
 desc:def
 
 Accuracy:0.78
-F1 score:0.7735594320913285
+F1 score:0.7750417334329178

@@ -177,12 +177,13 @@ class File_loader:
         self.encoded_labels = [self.label2idx[label] for label in self.labels]
         # padding for the short sentences
         for en_sen in self.encoded_sentences:
+            while len(en_sen) > padding:
+                en_sen.pop()
             while len(en_sen) < padding:
                 en_sen.append(0)
         # put the encoded labels and sentences together
         for i in range(len(self.encoded_labels)):
             en_sen = torch.LongTensor(self.encoded_sentences[i])
-            # en_lab = torch.LongTensor([self.encoded_labels[i]])
             en_lab = self.encoded_labels[i]
             data_pair = (en_sen, en_lab)
             self.encoded_data.append(data_pair)

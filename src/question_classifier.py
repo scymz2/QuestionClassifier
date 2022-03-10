@@ -54,7 +54,6 @@ def get_encoded_data(path_file, path_vocab,path_label, path_stop, padding):
 
     return data
 
-
 def compute_acc(outputs, target):
     '''
     compute the accuracy and the f1_score of the model using sklearn.metrics.
@@ -152,7 +151,6 @@ def train(config, vocab):
     model_path = config['PATH']['path_model']
     torch.save(model, model_path)
 
-
 def test(config):
     model = torch.load(config['PATH']['path_model'])
     test_data = get_encoded_data(config['PATH']['path_test'], config['PATH']['path_vocab'],
@@ -181,8 +179,6 @@ def test(config):
         f.write('\nF1 score:' + str(test_f1))
 
     print('Test Accuracy: ', test_acc, ', Test f1: ', test_f1)
-
-
 
 
 if __name__ == "__main__":
@@ -215,4 +211,3 @@ if __name__ == "__main__":
     # test
     elif args.test:
         test(config)
-

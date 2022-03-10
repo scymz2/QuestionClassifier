@@ -30,4 +30,3 @@ python3 question_classifier.py --test --config [configuration_file_path]
 Please use the same configuration file path as training. Before testing the model, please make sure you have already finished training.
 
 ## Note
-Normally, when training the model, the test result would not 
