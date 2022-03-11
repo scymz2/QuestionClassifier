@@ -4,7 +4,6 @@ import torch
 import torch.optim as optim
 import random
 import sklearn.metrics as metrics
-import numpy as np
 import configparser
 import argparse
 import os
@@ -99,9 +98,7 @@ def train(config, vocab):
     dev_loader = torch.utils.data.DataLoader(dev_data, batch_size=batch_size)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size)
 
-    # criterion = nn.CrossEntropyLoss()
     criterion = nn.NLLLoss()
-    # optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     losses, train_accs = [], []
 
@@ -123,7 +120,6 @@ def train(config, vocab):
             train_accs.append(acc)
             train_out = torch.cat((train_out, output), 0)
             train_label = torch.cat((train_label, train_labels))
-            # print('Epoch: ', epoch, 'Train: Accuracy: ', acc)
 
         train_acc, train_f1 = compute_acc(train_out, train_label)
         print('Epoch: ', epoch, '\nTrain: Accuracy: ', train_acc, ', Train f1: ', train_f1)
@@ -137,16 +133,6 @@ def train(config, vocab):
 
         dev_acc, dev_f1 = compute_acc(dev_out, dev_label)
         print('Validation Accuracy: ', dev_acc, ', Validation f1: ', dev_f1)
-
-        test_out = torch.tensor([])
-        test_label = torch.tensor([])
-        for test_feats, test_labels in iter(test_loader):
-            out = model(test_feats)
-            test_out = torch.cat((test_out, out), 0)
-            test_label = torch.cat((test_label, test_labels))
-
-        test_acc, test_f1 = compute_acc(test_out, test_label)
-        print('Test Accuracy: ', test_acc, ', Test f1: ', test_f1)
 
     model_path = config['PATH']['path_model']
     torch.save(model, model_path)
@@ -170,6 +156,7 @@ def test(config):
         test_out = torch.cat((test_out, out), 0)
         test_label = torch.cat((test_label, test_labels))
 
+    # write the output file
     test_acc, test_f1 = compute_acc(test_out, test_label)
     pred = test_out.max(1,keepdim=True)[1]
     with open(config['PATH']['path_output'], 'w') as f:

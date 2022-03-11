@@ -4,7 +4,7 @@ This document describes all the important functions in the source code, in the o
 # Preprocess
 The codes for preprocessing are located in the folder 'utility'. 'file_loader.py' is for the data preprocessing, and 'pre_train.py' preprocesses the pre-train weight.
 
-### file_loader.py 
+### `file_loader.py `
 
 This class contains functions of reading the file, lowercase the data, removing stopwords, splitting the raw dataset, create the vocabulary file and label file, and encoding sentences and labels. After creating an object of this class and passing the path to the inside function 'read_file', we can do other preprocessing stops for the target data file using the object and its functions.
 
@@ -54,7 +54,7 @@ def get_encoded_data(self, padding):
     """
 ```
 
-### pre_train.py
+### `pre_train.py`
 This class is used for get the pre-train weight that suitable for our data. More specifically, it reads the pre-trained embeddings from the file and gets the pre-trained embeddings for the words which are in our vocabulary list. If the words are in our vocabulary but not in the pre-trained list, mark the words to #unk#. If the words are in the pre-trained file but not appears in our data, just remove the embeddings.
 ```python
 def load_pretrain(self, path, vocab):
@@ -72,7 +72,7 @@ There are two main steps to implement the question classifier. The first one is 
 
 We use BoW and BiLSTM to train the sentence representation (get the sentence vector), and use a feed-forward neural network to implement the classification task.
 
-### bow.py
+### `bow.py`
 ```python
 class BoW(nn.Module):
     def __init__(self,
@@ -85,7 +85,7 @@ class BoW(nn.Module):
 
 in the above class we built the BoW layer which uses nn.EmbeddingBag to get the sentence vector of the input sentences.
 
-### biLSTM.py
+### `biLSTM.py`
 ```python
 class BiLSTM(nn.Module):
     def __init__(self,
@@ -96,16 +96,16 @@ class BiLSTM(nn.Module):
                  embedding_dim,
                  hidden_dim_bilstm):
 ```
-in the BiLSTM class we built the BiLSTM layer which uses recurrent neural network to get  the sentence vector from the context.
+in the BiLSTM class we built the BiLSTM layer which uses recurrent neural network to get the sentence vector from the context. It joints the forward and backward information together to represent the sentence.
 
-### classifier.py
+### `classifier.py`
 ```python
 class Classifier(nn.Module):
     def __init__(self, n_input, n_hidden, n_output):
 ```
 This is a feed-forward neural network with logSoftmax output to implement the classification task. Using logSoftmax instead of softmax to fit the later NLL Loss function.
 
-### model.py
+### `model.py`
 ```python
 def forward(self,input):
     out = self.sentence_rep(input)
@@ -115,7 +115,7 @@ def forward(self,input):
 This part integrated the sentence representation and classification together. The output of the bow/bilstm is the sentence vector, which is as the input of the later classification Neural Network.
 
 # Train & Test
-### question_classifier.py
+### `question_classifier.py`
 'question_classifier.py' is the main file which is mainly used to training, evaluation and test the model.
 #### helpers
 The followings are the helper functions for training and the descriptions are as follows inside the function.
@@ -159,4 +159,4 @@ In the train function, first get the data ready, then create a model object, and
 
 After all epochs, the model will be saved in 'model_path' (can be set in the config.ini).
 
-Once the model was saved, the test function would load the trained model, and use test data to test the performance of the model (print accuracy and f1 score)
+Once the model was saved, when in 'test' mode, the test function would load the trained model, and use test data to test the performance of the model (print accuracy and f1 score). Then output a txt file, in which each line is a class for each testing question and the end of which is the performance of the model.
