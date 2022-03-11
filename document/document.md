@@ -117,7 +117,7 @@ This part integrated the sentence representation and classification together. Th
 # Train & Test
 ### `question_classifier.py`
 'question_classifier.py' is the main file which is mainly used to training, evaluation and test the model.
-#### helpers
+### helpers
 The followings are the helper functions for training and the descriptions are as follows inside the function.
 ```python
 def load_raw_file(config):
@@ -152,7 +152,7 @@ def compute_acc(outputs, target):
     '''
 ```
 
-#### train & test
+### train & test
 Function 'train' will run when detecting --train in the command line, and 'test' will run when detecting --test.
 
 In the train function, first get the data ready, then create a model object, and start training. In each epoch, the validation data was used to test the performance of the current model. 
