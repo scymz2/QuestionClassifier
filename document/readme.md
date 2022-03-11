@@ -11,6 +11,7 @@ macOS 10.15.7, with 2.2 GHz 6-gen Intel Core i7 and 16 GB RAM
 
 windows 11, with Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz 2.59 GHz and RAM 16.0 GB
 
+the environment file is located in ../src/requirements.txt
 
 ## Data
 `training data` note: it is said to have 5500 questions but we could only find 5452 labeled questions.
